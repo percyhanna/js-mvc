@@ -11,21 +11,40 @@ View.create('Store.Item.Edit', {
             bindings: {
                 html: '@content'
             }
+        },
+        counter: {
+            tag: 'span',
+            bindings: {
+                text: '@counter'
+            }
         }
     },
-    render: function(uniq, data) {
-        this.data = data;
-        this.uniq = uniq;
-        return '<div>' + this.element('title') + this.element('content') + '</div>';
-    },
-    afterInsert: function(uniq, data) {
-        // nothing
-    }
+    components: [
+        '<div>',
+        '@title',
+        '@content',
+        '<p>The counter is at: ',
+        '@counter',
+        '</p></div>',
+    ]
 });
 
 window.onload = function() {
-    document.body.innerHTML = Views.Store.Item.Edit.render('test', {
+    var myModel = {
         title: 'Hello, World!',
-        content: '<p>This is a test.'
+        content: '<p>This is a test.</p>',
+        counter: 1
+    };
+    
+    document.getElementById('container').innerHTML = Views.Store.Item.Edit.render('test', myModel);
+    
+    ['test1', 'test2', 'test3'].forEach(function(id) {
+        var button = document.getElementById(id);
+        button.addEventListener('click', function() {
+            var button = document.getElementById(id);
+            myModel.title = button.innerText;
+            myModel.counter++;
+            Views.Store.Item.Edit.update('test', myModel);
+        });
     });
 };

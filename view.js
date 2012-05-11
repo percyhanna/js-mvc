@@ -1,54 +1,67 @@
 var View = Class.extend({
     init: function(def) {
-        this.elements = def.elements || {};
-        this.render = def.render;
-        this.afterInsert = def.afterInsert;
+        this.elements = {};
         this.data = {};
+
+        var index = 0,
+            components = def.components,
+            length = components.length,
+            component;
+        for (; index < length; index++) {
+            component = components[index];
+            if (component[0] === '@') {
+                component = component.substring(1);
+                if (def.elements[component]) {
+                    this.elements[component] = components[index] = new View.Element(component, def.elements[component]);
+                } else {
+                    throw new Error('Invalid element name: ' + component);
+                }
+            }
+        }
+        this._components = components;
     },
     update: function(uniq, data) {
         for (var name in this.elements) {
-            var element = new View.Element(name, uniq, this.elements[name], data),
+            var element = this.elements[name],
                 el = document.getElementById(uniq + '_' + name);
-            element.update(el);
+            element.update(el, uniq, data);
         }
     },
-    element: function(name) {
-        if (!this.elements[name]) {
-            return '';
-        }
-        return new View.Element(name, this.uniq, this.elements[name], this.data);
+    render: function(uniq, data) {
+        return this._components.map(function(component) {
+            if (typeof component === 'string') {
+                return component;
+            } else {
+                console.log(component);
+                return component.render(uniq, data);
+            }
+        }).join('');
     }
 });
 
 View.Element = Class.extend({
-    init: function(name, uniq, element, data) {
+    init: function(name, element) {
         this.name = name;
-        this.uniq = uniq;
         this.element = element;
-        this.data = data;
     },
-    update: function(el) {
-        var bindings = this.element.bindings,
-            key,
-            value;
-        el.setAttribute('id', this.uniq + '_' + this.name);
-        for (var binding in this.element.bindings) {
-            key = bindings[binding];
-            value = this.loadValue(key);
-            View.Element.Bindings[binding](el, value);
+    update: function(el, uniq, data) {
+        var bindings = this.element.bindings;
+        el.setAttribute('id', uniq + '_' + this.name);
+        for (var binding in bindings) {
+            View.Element.Bindings[binding](el, this.loadValue(bindings[binding], data));
         }
     },
-    loadValue: function(key) {
+    loadValue: function(key, data) {
         if (key.charAt(0) === '@') {
             key = key.substring(1);
-            return this.data[key];
+            return data[key];
         } else {
             return 'No value...';
         }
     },
-    toString: function() {
+    render: function(uniq, data) {
         var el = document.createElement(this.element.tag);
-        this.update(el);
+        this.update(el, uniq, data);
         return el.outerHTML;
     }
 });
