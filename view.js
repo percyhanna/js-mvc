@@ -1,8 +1,5 @@
-var View = Class.extend({
-    init: function(def) {
-        this.elements = {};
-        this.data = {};
-
+var View = Class.extend((function() {
+    function processComponents(view, def) {
         var index = 0,
             components = def.components,
             length = components.length,
@@ -12,41 +9,55 @@ var View = Class.extend({
             if (component[0] === '@') {
                 component = component.substring(1);
                 if (def.elements[component]) {
-                    this.elements[component] = components[index] = new View.Element(component, def.elements[component]);
+                    view.elements[component] = components[index] = new View.Element(view.uniq + '_' + component, def.elements[component]);
                 } else {
                     throw new Error('Invalid element name: ' + component);
                 }
             }
         }
-        this._components = components;
-    },
-    update: function(uniq, data) {
-        for (var name in this.elements) {
-            var element = this.elements[name],
-                el = document.getElementById(uniq + '_' + name);
-            element.update(el, uniq, data);
-        }
-    },
-    render: function(uniq, data) {
-        return this._components.map(function(component) {
-            if (typeof component === 'string') {
-                return component;
-            } else {
-                console.log(component);
-                return component.render(uniq, data);
-            }
-        }).join('');
+        return components;
     }
-});
+    
+    return {
+        init: function(uniq, data, def) {
+            this.uniq = uniq;
+            this.elements = {};
+            this.data = data;
+
+            this._components = processComponents(this, def);
+        },
+        update: function() {
+            for (var name in this.elements) {
+                var element = this.elements[name],
+                    el = document.getElementById(this.uniq + '_' + name);
+                element.update(el, this.uniq, this.data);
+            }
+        },
+        render: function() {
+            var rendered = this._components.map(function(component) {
+                if (component.render) {
+                    return component.render(this.data);
+                } else {
+                    return component;
+                }
+            }).join('');
+
+            // Event handlers
+            for (var name in this.elements) {
+                this.elements[name].
+            }
+        }
+    };
+})());
 
 View.Element = Class.extend({
     init: function(name, element) {
         this.name = name;
         this.element = element;
     },
-    update: function(el, uniq, data) {
+    update: function(el, data) {
         var bindings = this.element.bindings;
-        el.setAttribute('id', uniq + '_' + this.name);
+        el.setAttribute('id', this.name);
         for (var binding in bindings) {
             View.Element.Bindings[binding](el, this.loadValue(bindings[binding], data));
         }
@@ -59,9 +70,9 @@ View.Element = Class.extend({
             return 'No value...';
         }
     },
-    render: function(uniq, data) {
+    render: function(data) {
         var el = document.createElement(this.element.tag);
-        this.update(el, uniq, data);
+        this.update(el, data);
         return el.outerHTML;
     }
 });
@@ -76,6 +87,6 @@ View.Element.Bindings = {
 };
 
 View.create = function(name, def) {
-    var view = new View(def);
+    var view = View.extend(def);
     namespace('Views.' + name, view);
 };

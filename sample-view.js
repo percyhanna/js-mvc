@@ -4,6 +4,9 @@ View.create('Store.Item.Edit', {
             tag: 'h1',
             bindings: {
                 text: "@title"
+            },
+            events: {
+                click: 'titleClicked'
             }
         },
         content: {
@@ -26,15 +29,19 @@ View.create('Store.Item.Edit', {
         '<p>The counter is at: ',
         '@counter',
         '</p></div>',
-    ]
+    ],
+    titleClicked: function(e) {
+        console.log('Title was clicked: ' + this.innerText);
+    }
 });
 
 window.onload = function() {
     var myModel = {
-        title: 'Hello, World!',
-        content: '<p>This is a test.</p>',
-        counter: 1
-    };
+            title: 'Hello, World!',
+            content: '<p>This is a test.</p>',
+            counter: 1
+        },
+        myView = new Views.Store.Item.Edit();
     
     document.getElementById('container').innerHTML = Views.Store.Item.Edit.render('test', myModel);
     
