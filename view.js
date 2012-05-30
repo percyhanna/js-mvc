@@ -71,10 +71,10 @@ var View = Class.extend((function() {
             this.components = processComponents.call(this);
         },
         update: function() {
-            for (var name in this.elements) {
-                var element = this.elementCache[name],
-                    el = document.getElementById(this.uniq + '_' + name);
-                element.update(el);
+            var element, name;
+            for (name in this.elements) {
+                element = this.elementCache[name];
+                element.update(this.nodeForElement(name));
             }
         },
         render: function() {
@@ -86,11 +86,26 @@ var View = Class.extend((function() {
                 }
             }).join('');
 
-            // Event handlers
-            for (var name in this.elements) {
-            }
-            
             return rendered;
+        },
+        nodeForElement: function(name) {
+            if (this.elementCache[name]) {
+                return document.getElementById(this.uniq + '_' + name);
+            }
+        },
+        addEvents: function() {
+            var name, element, eventName, node, methodName,
+                that = this;
+            for (name in this.elements) {
+                element = this.elements[name];
+                node = this.nodeForElement(name);
+                for (eventName in element.events) {
+                    methodName = element.events[eventName];
+                    if (this[methodName]) {
+                        node.addEventListener(eventName, this[methodName].bind(this, node));
+                    }
+                }
+            }
         }
     };
 })());

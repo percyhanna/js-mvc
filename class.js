@@ -61,3 +61,13 @@
     return Class;
   };
 })();
+
+Function.prototype.bind = function() {
+    var __method = this,
+        bound = arguments[0],
+        slice = Array.prototype.slice,
+        args = slice.call(arguments, 1);
+    return function() {
+        return __method.apply(bound, args.concat(slice.call(arguments)));
+    };
+}

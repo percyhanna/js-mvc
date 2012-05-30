@@ -38,8 +38,8 @@ View.create('Store.Item.Edit', {
         '</p>',
         '@</wrapper>',
     ],
-    titleClicked: function(e) {
-        console.log('Title was clicked: ' + this.innerText);
+    titleClicked: function(el) {
+        alert('Title was clicked: ' + el.innerText);
     }
 });
 
@@ -55,6 +55,8 @@ window.onload = function() {
         myView = new Views.Store.Item.Edit('container', myModel);
     
     console.log(document.getElementById('container').innerHTML = myView.render());
+    
+    myView.addEvents();
     
     ['test1', 'test2', 'test3'].forEach(function(id) {
         var button = document.getElementById(id);
