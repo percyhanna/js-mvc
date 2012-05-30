@@ -1,15 +1,19 @@
 var View = Class.extend((function() {
-    function processComponents(view, def) {
-        var index = 0,
-            components = def.components,
-            length = components.length,
-            component;
-        for (; index < length; index++) {
+    function processComponents(def) {
+        var klass, component, index, element,
+            components = this.components,
+            length = components.length;
+        for (index = 0; index < length; index++) {
             component = components[index];
             if (component[0] === '@') {
                 component = component.substring(1);
-                if (def.elements[component]) {
-                    view.elements[component] = components[index] = new View.Element(view.uniq + '_' + component, def.elements[component]);
+                element = this.elements[component];
+                if (element) {
+                    klass = View.Element;
+                    if (element.view) {
+                        klass = element.view;
+                    }
+                    this._elementCache[component] = components[index] = new klass(this.uniq + '_' + component, element, this);
                 } else {
                     throw new Error('Invalid element name: ' + component);
                 }
@@ -19,24 +23,25 @@ var View = Class.extend((function() {
     }
     
     return {
-        init: function(uniq, data, def) {
+        init: function(uniq, data) {
             this.uniq = uniq;
-            this.elements = {};
             this.data = data;
 
-            this._components = processComponents(this, def);
+            this._elementCache = {};
+
+            this._components = processComponents.call(this);
         },
         update: function() {
             for (var name in this.elements) {
-                var element = this.elements[name],
+                var element = this._elementCache[name],
                     el = document.getElementById(this.uniq + '_' + name);
-                element.update(el, this.uniq, this.data);
+                element.update(el);
             }
         },
         render: function() {
             var rendered = this._components.map(function(component) {
                 if (component.render) {
-                    return component.render(this.data);
+                    return component.render();
                 } else {
                     return component;
                 }
@@ -44,35 +49,37 @@ var View = Class.extend((function() {
 
             // Event handlers
             for (var name in this.elements) {
-                this.elements[name].
             }
+            
+            return rendered;
         }
     };
 })());
 
 View.Element = Class.extend({
-    init: function(name, element) {
+    init: function(name, element, view) {
         this.name = name;
         this.element = element;
+        this.view = view;
     },
-    update: function(el, data) {
+    update: function(el) {
         var bindings = this.element.bindings;
         el.setAttribute('id', this.name);
         for (var binding in bindings) {
-            View.Element.Bindings[binding](el, this.loadValue(bindings[binding], data));
+            View.Element.Bindings[binding](el, this.loadValue(bindings[binding]));
         }
     },
-    loadValue: function(key, data) {
+    loadValue: function(key) {
         if (key.charAt(0) === '@') {
             key = key.substring(1);
-            return data[key];
+            return this.view.data[key];
         } else {
             return 'No value...';
         }
     },
-    render: function(data) {
+    render: function() {
         var el = document.createElement(this.element.tag);
-        this.update(el, data);
+        this.update(el);
         return el.outerHTML;
     }
 });
@@ -83,6 +90,9 @@ View.Element.Bindings = {
     },
     html: function(el, val) {
         el.innerHTML = val;
+    },
+    hidden: function(el, val) {
+        el.style.display = !!val ? 'none' : 'block';
     }
 };
 

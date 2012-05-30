@@ -41,9 +41,9 @@ window.onload = function() {
             content: '<p>This is a test.</p>',
             counter: 1
         },
-        myView = new Views.Store.Item.Edit();
+        myView = new Views.Store.Item.Edit("container", myModel);
     
-    document.getElementById('container').innerHTML = Views.Store.Item.Edit.render('test', myModel);
+    document.getElementById('container').innerHTML = myView.render();
     
     ['test1', 'test2', 'test3'].forEach(function(id) {
         var button = document.getElementById(id);
@@ -51,7 +51,7 @@ window.onload = function() {
             var button = document.getElementById(id);
             myModel.title = button.innerText;
             myModel.counter++;
-            Views.Store.Item.Edit.update('test', myModel);
+            myView.update();
         });
     });
 };
