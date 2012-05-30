@@ -1,23 +1,62 @@
 var View = Class.extend((function() {
+    function elementFactory(name) {
+        var klass,
+            element = this.elements[name];
+
+        if (!element) {
+            throw new Error('Invalid element named: ' + name);
+        }
+
+        klass = element.view || View.Element;
+        return new klass(this.uniq + '_' + name, element, this);
+    }
+
+    function componentFactory(component) {
+        var element, closing, klass, def,
+            name = component,
+            type = typeof component;
+
+        if (type === 'string') {
+            if (name[0] === '@') {
+                name = name.substring(1);
+                switch (name[0]) {
+                    case '<':
+                        name = name.slice(1, -1);
+                        closing = name[0] === '/';
+                        if (closing) {
+                            name = name.substring(1);
+                        }
+                        klass = closing ? View.Components.Wrapper.Close : View.Components.Wrapper.Open;
+                        break;
+                }
+            } else {
+                return component;
+            }
+        }
+
+        // If it's already cached (some elements can be repeated)
+        if (this.elementCache[name]) {
+            element = this.elementCache[name];
+        } else {
+            this.elementCache[name] = element = elementFactory.call(this, name);
+        }
+
+        // Custom component class?
+        if (klass) {
+            return new klass(element);
+        } else {
+            return element;
+        }
+    }
+    
     function processComponents(def) {
         var klass, component, index, element,
-            components = this.components,
+            components = this.components.slice(0),
             length = components.length;
         for (index = 0; index < length; index++) {
             component = components[index];
-            if (component[0] === '@') {
-                component = component.substring(1);
-                element = this.elements[component];
-                if (element) {
-                    klass = View.Element;
-                    if (element.view) {
-                        klass = element.view;
-                    }
-                    this._elementCache[component] = components[index] = new klass(this.uniq + '_' + component, element, this);
-                } else {
-                    throw new Error('Invalid element name: ' + component);
-                }
-            }
+
+            this.elementCache[component] = components[index] = componentFactory.call(this, component);
         }
         return components;
     }
@@ -27,19 +66,19 @@ var View = Class.extend((function() {
             this.uniq = uniq;
             this.data = data;
 
-            this._elementCache = {};
+            this.elementCache = {};
 
-            this._components = processComponents.call(this);
+            this.components = processComponents.call(this);
         },
         update: function() {
             for (var name in this.elements) {
-                var element = this._elementCache[name],
+                var element = this.elementCache[name],
                     el = document.getElementById(this.uniq + '_' + name);
                 element.update(el);
             }
         },
         render: function() {
-            var rendered = this._components.map(function(component) {
+            var rendered = this.components.map(function(component) {
                 if (component.render) {
                     return component.render();
                 } else {
@@ -55,6 +94,42 @@ var View = Class.extend((function() {
         }
     };
 })());
+
+View.Components = (function() {
+    var Base = Class.extend({
+        init: function() {
+            
+        },
+        
+        toString: function() {
+            return '';
+        }
+    });
+
+    return {
+        Wrapper: {
+            Open: Base.extend({
+                init: function(element) {
+                    this.element = element;
+                },
+
+                toString: function() {
+                    return this.element.create().cloneNode(false).outerHTML.replace('</' + this.element.element.tag + '>', '');
+                }
+            }),
+
+            Close: Base.extend({
+                init: function(element) {
+                    this.element = element;
+                },
+
+                toString: function() {
+                    return '</' + this.element.element.tag + '>';
+                }
+            })
+        }
+    }
+})();
 
 View.Element = Class.extend({
     init: function(name, element, view) {
@@ -77,10 +152,13 @@ View.Element = Class.extend({
             return 'No value...';
         }
     },
-    render: function() {
+    create: function() {
         var el = document.createElement(this.element.tag);
         this.update(el);
-        return el.outerHTML;
+        return el;
+    },
+    render: function() {
+        return this.create().outerHTML;
     }
 });
 
@@ -93,6 +171,9 @@ View.Element.Bindings = {
     },
     hidden: function(el, val) {
         el.style.display = !!val ? 'none' : 'block';
+    },
+    background: function(el, val) {
+        el.style.background = val;
     }
 };
 

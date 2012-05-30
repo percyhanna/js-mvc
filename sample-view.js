@@ -3,7 +3,7 @@ View.create('Store.Item.Edit', {
         title: {
             tag: 'h1',
             bindings: {
-                text: "@title"
+                text: '@title'
             },
             events: {
                 click: 'titleClicked'
@@ -20,15 +20,23 @@ View.create('Store.Item.Edit', {
             bindings: {
                 text: '@counter'
             }
+        },
+        wrapper: {
+            tag: 'div',
+            bindings: {
+                background: '@background',
+                hidden: '@hidden'
+            }
         }
     },
     components: [
-        '<div>',
+        '@<wrapper>',
         '@title',
         '@content',
         '<p>The counter is at: ',
         '@counter',
-        '</p></div>',
+        '</p>',
+        '@</wrapper>',
     ],
     titleClicked: function(e) {
         console.log('Title was clicked: ' + this.innerText);
@@ -39,19 +47,29 @@ window.onload = function() {
     var myModel = {
             title: 'Hello, World!',
             content: '<p>This is a test.</p>',
+            background: 'red',
+            hidden: false,
             counter: 1
         },
-        myView = new Views.Store.Item.Edit("container", myModel);
+        colors = ['silver', 'gray', 'red', 'maroon', 'yellow', 'olive', 'lime', 'green', 'aqua', 'teal', 'blue', 'navy', 'fuchsia', 'purple'],
+        myView = new Views.Store.Item.Edit('container', myModel);
     
-    document.getElementById('container').innerHTML = myView.render();
+    console.log(document.getElementById('container').innerHTML = myView.render());
     
     ['test1', 'test2', 'test3'].forEach(function(id) {
         var button = document.getElementById(id);
         button.addEventListener('click', function() {
-            var button = document.getElementById(id);
+            var color = colors.shift();
             myModel.title = button.innerText;
             myModel.counter++;
+            myModel.background = color;
             myView.update();
+            colors.push(color);
         });
+    });
+    
+    document.getElementById('toggle').addEventListener('click', function() {
+        myModel.hidden = !myModel.hidden;
+        myView.update();
     });
 };
