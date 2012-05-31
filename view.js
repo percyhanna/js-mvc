@@ -112,10 +112,6 @@ var View = Class.extend((function() {
 
 View.Components = (function() {
     var Base = Class.extend({
-        init: function() {
-            
-        },
-        
         toString: function() {
             return '';
         }
@@ -186,9 +182,6 @@ View.Element.Bindings = {
     },
     hidden: function(el, val) {
         el.style.display = !!val ? 'none' : 'block';
-    },
-    background: function(el, val) {
-        el.style.background = val;
     }
 };
 

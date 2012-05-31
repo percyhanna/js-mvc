@@ -24,7 +24,6 @@ View.create('Store.Item.Edit', {
         wrapper: {
             tag: 'div',
             bindings: {
-                background: '@background',
                 hidden: '@hidden'
             }
         }
@@ -51,7 +50,6 @@ window.onload = function() {
             hidden: false,
             counter: 1
         },
-        colors = ['silver', 'gray', 'red', 'maroon', 'yellow', 'olive', 'lime', 'green', 'aqua', 'teal', 'blue', 'navy', 'fuchsia', 'purple'],
         myView = new Views.Store.Item.Edit('container', myModel);
     
     console.log(document.getElementById('container').innerHTML = myView.render());
@@ -61,12 +59,9 @@ window.onload = function() {
     ['test1', 'test2', 'test3'].forEach(function(id) {
         var button = document.getElementById(id);
         button.addEventListener('click', function() {
-            var color = colors.shift();
             myModel.title = button.innerText;
             myModel.counter++;
-            myModel.background = color;
             myView.update();
-            colors.push(color);
         });
     });
     
