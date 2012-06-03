@@ -1,3 +1,30 @@
+var appRouter = new Router(),
+    routes = appRouter.routes;
+
+routes['home'] = Route.create('/');
+routes['about'] = Route.create('/about');
+routes['contact_us'] = Route.create('/about/contact_us');
+routes['search'] = Route.create('/search/:term');
+routes['item_edit'] = Route.create('/item/edit/#id');
+routes['item_edit'] = Route.create('/item/edit/#id');
+routes['wildcard'] = Route.create('/my/wildcard/*');
+
+// console.log(appRouter.parseRoute('/'));
+// console.log(appRouter.parseRoute('/about'));
+// console.log(appRouter.parseRoute('/about/'));
+// console.log(appRouter.parseRoute('/about/contact_us'));
+// console.log(appRouter.parseRoute('/about/contact_us/'));
+// console.log(appRouter.parseRoute('/search/car'));
+// console.log(appRouter.parseRoute('/search/tree'));
+// console.log(appRouter.parseRoute('/item'));
+// console.log(appRouter.parseRoute('/item/view/'));
+// console.log(appRouter.parseRoute('/item/view/1'));
+// console.log(appRouter.parseRoute('/item/view/1/'));
+// console.log(appRouter.parseRoute('/item/edit/2/'));
+// console.log(appRouter.parseRoute('/my/wildcard/'));
+// console.log(appRouter.parseRoute('/my/wildcard/testing/123/'));
+// console.log(appRouter.parseRoute('/404'));
+
 View.create('Store.Item.Edit', {
     elements: {
         title: {
@@ -52,7 +79,7 @@ window.onload = function() {
         },
         myView = new Views.Store.Item.Edit('container', myModel);
     
-    console.log(document.getElementById('container').innerHTML = myView.render());
+    document.getElementById('container').innerHTML = myView.render();
     
     myView.addEvents();
     
