@@ -1,29 +1,13 @@
-var appRouter = new Router(),
-    routes = appRouter.routes;
+View.static('Welcome', '<h1>Welcome!</h1><p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>');
 
-routes['home'] = Route.create('/');
-routes['about'] = Route.create('/about');
-routes['contact_us'] = Route.create('/about/contact_us');
-routes['search'] = Route.create('/search/:term');
-routes['item_edit'] = Route.create('/item/edit/#id');
-routes['item_edit'] = Route.create('/item/edit/#id');
-routes['wildcard'] = Route.create('/my/wildcard/*');
+View.static('About', '<h1>About Us</h1><p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>');
 
-// console.log(appRouter.parseRoute('/'));
-// console.log(appRouter.parseRoute('/about'));
-// console.log(appRouter.parseRoute('/about/'));
-// console.log(appRouter.parseRoute('/about/contact_us'));
-// console.log(appRouter.parseRoute('/about/contact_us/'));
-// console.log(appRouter.parseRoute('/search/car'));
-// console.log(appRouter.parseRoute('/search/tree'));
-// console.log(appRouter.parseRoute('/item'));
-// console.log(appRouter.parseRoute('/item/view/'));
-// console.log(appRouter.parseRoute('/item/view/1'));
-// console.log(appRouter.parseRoute('/item/view/1/'));
-// console.log(appRouter.parseRoute('/item/edit/2/'));
-// console.log(appRouter.parseRoute('/my/wildcard/'));
-// console.log(appRouter.parseRoute('/my/wildcard/testing/123/'));
-// console.log(appRouter.parseRoute('/404'));
+View.static('ContactUs', '<h1>Contact Us</h1><p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>');
+
+View.static('Search.Results', '<h1>Results</h1><p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>');
+View.static('Search.Facets', '<h1>Facets</h1><p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>');
+
+View.static('Wildcard', '<h1>Wildcard</h1><p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>');
 
 View.create('Store.Item.Edit', {
     elements: {
@@ -69,6 +53,36 @@ View.create('Store.Item.Edit', {
     }
 });
 
+var appRouter = new Router(),
+    routes = appRouter.routes;
+
+Controller.create('Home', {
+    primary: [Views.Welcome]
+}),
+Controller.create('About', {
+    primary: [Views.About]
+}),
+Controller.create('ContactUs', {
+    primary: [Views.ContactUs]
+}),
+Controller.create('Search', {
+    primary: [Views.Search.Results],
+    secondary: [Views.Search.Facets]
+}),
+Controller.create('ItemEdit', {
+    primary: [Views.Store.Item.Edit]
+}),
+Controller.create('Wildcard', {
+    primary: [Views.Wildcard]
+});
+
+routes['home'] = Route.create('/', Controllers.Home);
+routes['about'] = Route.create('/about', Controllers.About);
+routes['contact_us'] = Route.create('/about/contact_us', Controllers.ContactUs);
+routes['search'] = Route.create('/search/:term', Controllers.Search);
+routes['item_edit'] = Route.create('/item/edit/#id', Controllers.ItemEdit);
+routes['wildcard'] = Route.create('/wildcard/*', Controllers.Wildcard);
+
 window.onload = function() {
     var myModel = {
             title: 'Hello, World!',
@@ -96,4 +110,7 @@ window.onload = function() {
         myModel.hidden = !myModel.hidden;
         myView.update();
     });
+
+    appRouter.makeDefaultRouter();
+    Router.init();
 };

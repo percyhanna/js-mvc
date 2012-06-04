@@ -1,7 +1,8 @@
 var Route = Class.extend({
-    init: function(elemnts, wildcard) {
+    init: function(elemnts, wildcard, controller) {
         this.wildcard = !!wildcard;
         this._elements = elemnts || [];
+        this.controller = controller;
     },
 
     match: function(paths) {
@@ -60,7 +61,7 @@ var Route = Class.extend({
     }
 });
 
-Route.create = function(path) {
+Route.create = function(path, controller) {
     var index, content, element,
         wildcard = false,
         elements = [],
@@ -104,18 +105,22 @@ Route.create = function(path) {
         elements.push(element);
     }
 
-    return new Route(elements, wildcard);
+    return new Route(elements, wildcard, controller);
 };
 
 var Router = Class.extend({
     init: function() {
         this.routes = {};
     },
-    
+
+    makeDefaultRouter: function() {
+        Router.defaultRouter = this;
+    },
+
     addRoute: function(name, route) {
         this.routes[name] = route;
     },
-    
+
     parseRoute: function(path) {
         var name, route,
             paths = Router.cleanPaths(path);
@@ -124,17 +129,47 @@ var Router = Class.extend({
             route = this.routes[name];
             if (route.match(paths)) {
                 return {
-                    route: name,
+                    name: name,
+                    route: route,
                     params: route.parse(paths)
                 };
             }
         }
         return null;
+    },
+    
+    navigateToPath: function(path) {
+        var controller,
+            parsedRoute = this.parseRoute(path);
+        if (parsedRoute) {
+            controller = new parsedRoute.route.controller(parsedRoute.params);
+            controller.load();
+        }
     }
 });
 
+Router.defaultRouter = null;
 Router.cleanPaths = function(path) {
     return path.replace(/^\/+|\/+$/g, '').replace(/\/{2,}/g, '/').split('/');
+};
+Router.init = function() {
+    document.addEventListener('click', function(e) {
+        if (!e) {
+            e = window.event;
+        }
+
+        var target = e.srcElement || e.target;
+        if (target && target.nodeName.toLowerCase() === 'a' && target.getAttribute('href').charAt(0) === '/') {
+            if (Router.defaultRouter) {
+                Router.defaultRouter.navigateToPath(target.getAttribute('href'));
+
+                e.cancelBubble = true;
+                e.defaultPrevented = true;
+                e.returnValue = false;
+                return false;
+            }
+        }
+    });
 };
 
 Router.Matches = {

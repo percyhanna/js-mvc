@@ -186,6 +186,24 @@ View.Element.Bindings = {
 };
 
 View.create = function(name, def) {
+    def.name = name;
     var view = View.extend(def);
     namespace('Views.' + name, view);
+    return view;
+};
+
+View.static = function(name, content) {
+    var view = View.extend({
+        name: name,
+        elements: [],
+        components: [],
+
+        render: function() {
+            return content;
+        },
+
+        update: function() {}
+    });
+    namespace('Views.' + name, view);
+    return view;
 };
