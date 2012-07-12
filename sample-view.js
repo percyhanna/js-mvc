@@ -10,6 +10,13 @@ View.static('Search.Facets', '<h1>Facets</h1><p>Lorem ipsum dolor sit amet, cons
 View.static('Wildcard', '<h1>Wildcard</h1><p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>');
 
 View.create('Store.Item.Edit', {
+    init: function(uniq, data) {
+        var that = this;
+        data.onChange = function() {
+            that.update();
+        };
+        this._super(uniq, data);
+    },
     elements: {
         title: {
             tag: 'h1',
@@ -70,6 +77,9 @@ Controller.create('Search', {
     secondary: [Views.Search.Facets]
 }),
 Controller.create('ItemEdit', {
+    init: function() {
+        this._super(myModel);
+    },
     primary: [Views.Store.Item.Edit]
 }),
 Controller.create('Wildcard', {
@@ -84,14 +94,15 @@ routes['item_edit'] = Route.create('/item/edit/#id', Controllers.ItemEdit);
 routes['wildcard'] = Route.create('/wildcard/*', Controllers.Wildcard);
 
 window.onload = function() {
-    var myModel = {
+    window.myModel = {
             title: 'Hello, World!',
             content: '<p>This is a test.</p>',
             background: 'red',
             hidden: false,
             counter: 1
-        },
-        myView = new Views.Store.Item.Edit('container', myModel);
+        };
+
+    var myView = new Views.Store.Item.Edit('container', myModel);
     
     document.getElementById('container').innerHTML = myView.render();
     
@@ -102,6 +113,7 @@ window.onload = function() {
         button.addEventListener('click', function() {
             myModel.title = button.innerText;
             myModel.counter++;
+            myModel.onChange();
             myView.update();
         });
     });

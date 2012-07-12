@@ -138,13 +138,14 @@ var Router = Class.extend({
         return null;
     },
     
-    navigateToPath: function(path) {
-        var controller,
-            parsedRoute = this.parseRoute(path);
+    loadPath: function(path) {
+        var parsedRoute = this.parseRoute(path);
+
         if (parsedRoute) {
-            controller = new parsedRoute.route.controller(parsedRoute.params);
-            controller.load();
+            return (new parsedRoute.route.controller(parsedRoute.params)).load();
         }
+
+        return null;
     }
 });
 
@@ -158,15 +159,22 @@ Router.init = function() {
             e = window.event;
         }
 
-        var target = e.srcElement || e.target;
+        var content,
+            target = e.srcElement || e.target;
+
         if (target && target.nodeName.toLowerCase() === 'a' && target.getAttribute('href').charAt(0) === '/') {
             if (Router.defaultRouter) {
-                Router.defaultRouter.navigateToPath(target.getAttribute('href'));
+                content = Router.defaultRouter.loadPath(target.getAttribute('href'));
+                if (content) {
+                    Render.content(content);
 
-                e.cancelBubble = true;
-                e.defaultPrevented = true;
-                e.returnValue = false;
-                return false;
+                    e.cancelBubble = true;
+                    e.defaultPrevented = true;
+                    e.returnValue = false;
+                    return false;
+                } else {
+                    
+                }
             }
         }
     });

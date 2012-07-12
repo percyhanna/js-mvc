@@ -72,6 +72,7 @@ var View = Class.extend((function() {
         },
         update: function() {
             var element, name;
+
             for (name in this.elements) {
                 element = this.elementCache[name];
                 element.update(this.nodeForElement(name));
@@ -88,6 +89,9 @@ var View = Class.extend((function() {
 
             return rendered;
         },
+        toString: function() {
+            return this.render();
+        },
         nodeForElement: function(name) {
             if (this.elementCache[name]) {
                 return document.getElementById(this.uniq + '_' + name);
@@ -96,6 +100,7 @@ var View = Class.extend((function() {
         addEvents: function() {
             var name, element, eventName, node, methodName,
                 that = this;
+
             for (name in this.elements) {
                 element = this.elements[name];
                 node = this.nodeForElement(name);

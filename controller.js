@@ -15,13 +15,24 @@ var Controller = Class.extend({
     },
 
     load: function() {
+        var content = {};
+
         this._contentAreas.forEach(function(area) {
-            var content = [];
-            this[area].forEach(function(viewClass, viewIndex) {
-                content.push(new viewClass('' + this + '_' + area + '_' + viewIndex, this.params).render());
+            content[area] = [];
+            this[area].forEach(function(view, viewIndex) {
+                content[area].push(this._viewFactory(view, viewIndex, area));
             }, this);
-            document.getElementById(area).innerHTML = content.join('');
         }, this);
+
+        return content;
+    },
+    
+    _viewFactory: function(view, viewIndex, area) {
+        if (view.init) {
+            return view.init(view);
+        } else {
+            return new view(area + '_' + viewIndex, this.params);
+        }
     }
 });
 
